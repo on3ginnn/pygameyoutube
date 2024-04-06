@@ -9,7 +9,9 @@ TIFFANY = (129, 216, 208)
 PURPLE = (129, 116, 208)
 TITLE = "fff"
 FAVICON = "static/img/fav/icon.svg"
-SIZE = width, height = 600, 300
+BACKGROUND_IMAGE = "static/img/bg.jpg"
+SPACESHEEP_SPRITE = "static/img/spacesheep2.png"
+SIZE = width, height = 960, 720
 
 
 def terminate():
@@ -18,86 +20,37 @@ def terminate():
 
 
 def main():
-    square = pygame.Surface((100, 100))
-    square.fill(PURPLE)
-
-    myfont = pygame.font.Font(
-        "static/font/Inconsolata/static/Inconsolata-Regular.ttf", 28
-    )
-    text = myfont.render(
-        "lorem text lorem text lorem text lorem text", True, TIFFANY, PURPLE
-    )
-
-    img = pygame.image.load("static/img/content/f.png")
-
-    rect = square.get_rect()
-    speed = [2, 2]
-
-    selected = [100, 50, 500, 250]
-    mouse_select = False
-
-    x, w = selected[0], selected[2] - selected[0]
-    y, h = selected[1], selected[3] - selected[1]
-    selected_zone = pygame.Surface((w, h))
+    bg_y = 0
+    bg_speed = 2
+    bg = pygame.image.load(BACKGROUND_IMAGE)
+    spacesheep_x = (width // 2) - 55
+    spacesheep_speed = 2
+    spacesheep = pygame.image.load(SPACESHEEP_SPRITE)
 
     while True:
-        screen.fill(TIFFANY)
-        screen.blit(text, (0, 0))
+        screen.blit(bg, (0, bg_y))
+        screen.blit(bg, (0, bg_y - height))
 
-        x, w = selected[0], selected[2] - selected[0]
-        y, h = selected[1], selected[3] - selected[1]
+        screen.blit(spacesheep, (spacesheep_x, 500))
 
-        if selected[2] < selected[0]:
-            x, w = selected[2], selected[0] - selected[2]
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT] and spacesheep_x - spacesheep_speed >= 0:
+            spacesheep_x -= spacesheep_speed
 
-        if selected[3] < selected[1]:
-            y, h = selected[3], selected[1] - selected[3]
+        if (
+            keys[pygame.K_RIGHT]
+            and spacesheep_x + spacesheep_speed <= width - 110
+        ):
+            spacesheep_x += spacesheep_speed
 
-        if mouse_select:
-            selected_zone = pygame.Surface((w, h))
-            selected_zone.fill("white")
-
-        screen.blit(selected_zone, (x, y))
-
-        selected_zone.fill("white")
-        selected_zone.blit(square, rect)
-        pygame.draw.circle(square, TIFFANY, (50, 50), 49)
-        square.blit(img, (35, 35))
+        spacesheep_x %= width - 110
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    screen.fill(PURPLE)
-                    square.fill(TIFFANY)
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_select = True
-                selected = [0, 0, 0, 0]
-                selected[0] = event.pos[0]
-                selected[1] = event.pos[1]
-                selected[2] = event.pos[0]
-                selected[3] = event.pos[1]
-            elif event.type == pygame.MOUSEMOTION and mouse_select:
-                selected[2] = event.pos[0]
-                selected[3] = event.pos[1]
-            elif event.type == pygame.MOUSEBUTTONUP:
-                mouse_select = False
-                selected[2] = event.pos[0]
-                selected[3] = event.pos[1]
 
-                selected_zone.fill("white")
-                square = pygame.Surface((100, 100))
-                square.fill(PURPLE)
-                rect = square.get_rect()
-
-        rect = rect.move(speed)
-
-        if rect.left < 0 or rect.right > w:
-            speed[0] = -speed[0]
-
-        if rect.top < 0 or rect.bottom > h:
-            speed[1] = -speed[1]
+        bg_y += bg_speed
+        bg_y %= height
 
         pygame.display.flip()
         clock.tick(60)
